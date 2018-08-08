@@ -90,7 +90,7 @@ pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
 pub fn prefix_allowed<T: AsRef<str>>(prefix: &T) -> bool {
     let forbidden = vec!["eth", "eno", "ens", "em"];
 
-    forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none()
+    forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none() && prefix.as_ref().len() < 16
 }
 
 pub fn exit_maybe_unlock(sema: Option<&mut Semaphore>, exit_code: i32) -> ! {
