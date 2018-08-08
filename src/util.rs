@@ -87,6 +87,12 @@ pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
     Ok(prefix)
 }
 
+pub fn prefix_allowed<T: AsRef<str>>(prefix: &T) -> bool {
+    let forbidden = vec!["eth", "eno", "ens", "em"];
+
+    forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none()
+}
+
 pub fn exit_maybe_unlock(sema: Option<&mut Semaphore>, exit_code: i32) -> ! {
     if let Some(s) = sema {
         s.unlock();
@@ -147,5 +153,15 @@ mod tests {
     #[should_panic]
     fn hwaddr_normalize_invalid() {
         assert_eq!(hwaddr_normalize(&"xx:54:00:52:1f:93").unwrap(), "52:54:00:52:1F:93");
+    }
+
+    #[test]
+    fn net_prefix_allowed() {
+        assert_eq!(true, prefix_allowed(&"net"));
+    }
+
+    #[test]
+    fn eth_prefix_not_allowed() {
+        assert_eq!(false, prefix_allowed(&"eth"));
     }
 }

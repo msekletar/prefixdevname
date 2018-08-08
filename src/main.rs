@@ -32,6 +32,11 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
+    if ! prefix_allowed(&prefix) {
+        error!("Can't use prefix \"{}\" because it is a well-know prefix used by other tools", prefix);
+        exit_maybe_unlock(None, 0);
+    }
+
     let mut sema = match Semaphore::new_with_name("net-prefix-ifnames") {
         Ok(s) => s,
         Err(e) => {
