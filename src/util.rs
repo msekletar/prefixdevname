@@ -110,13 +110,13 @@ mod tests {
     #[test]
     #[should_panic]
     fn hwaddr_valid_invalid_chars() {
-        assert!(hwaddr_valid(&"11-22-33-44-55-xx");)
+        assert!(hwaddr_valid(&"11-22-33-44-55-xx"));
     }
 
     #[test]
     #[should_panic]
     fn hwaddr_valid_invalid_range() {
-        assert!(hwaddr_valid(&"ffff-33-44-55-66");)
+        assert!(hwaddr_valid(&"ffff-33-44-55-66"));
     }
 
     #[test]
