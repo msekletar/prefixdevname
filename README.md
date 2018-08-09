@@ -37,7 +37,7 @@ $ grubby --update-kernel=$(grubby --default-kernel) --args="net.ifnames.prefix=n
 $ reboot
 ```
 prefixdevname is spawned every time new networking hardware appears and we try to figure out what should be the next possible
-device name respecting our enumeration. We assign device name in the form "<PREFIX><NUMBER>", e.g. net2 in case that net0 and
+device name respecting our enumeration. We assign device name in the form "\<PREFIX\>\<INDEX\>", e.g. net2 in case that net0 and
 net1 are already present. The tool then generates the new .link file in /etc/systemd/network directory that applies the name
 to the interface with the MAC address that just appeared. Hence the configuration is persistent across reboots (it would make
 little sense otherwise). 
@@ -50,7 +50,7 @@ tool is aware of the new naming scheme (e.g. on Fedora one would have to adjust 
 is not an issue when naming scheme is already used at system installation time and network configuration
 is generated using prefix based names.
 
-User-defined prefix must be ASCII string that matches following regular expression, [[:alpha]]+ and must be shorter
+User-defined prefix must be ASCII string that matches following regular expression, [[:alpha:]]+ and must be shorter
 than 15 characters.
 
 Another limitation is that your prefix can not conflict with any other well-known prefix used for NIC naming on Linux.
