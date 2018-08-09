@@ -76,18 +76,10 @@ pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
         None => "".to_string()
     };
 
-    if prefix == "eth" {
-        return Err(From::from("Use of prefix \"eth\" is not allowed because it is the prefix used by the kernel"));
-    }
-
-    if prefix.len() > 14 {
-        return Err(From::from("Prefix too long, maximum length of prefix is 14 characters"));
-    }
-
     Ok(prefix)
 }
 
-pub fn prefix_allowed<T: AsRef<str>>(prefix: &T) -> bool {
+pub fn prefix_ok<T: AsRef<str>>(prefix: &T) -> bool {
     let forbidden = vec!["eth", "eno", "ens", "em"];
 
     forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none() && prefix.as_ref().len() < 16
@@ -156,12 +148,17 @@ mod tests {
     }
 
     #[test]
-    fn net_prefix_allowed() {
-        assert_eq!(true, prefix_allowed(&"net"));
+    fn net_prefix_ok() {
+        assert_eq!(true, prefix_ok(&"net"));
     }
 
     #[test]
-    fn eth_prefix_not_allowed() {
-        assert_eq!(false, prefix_allowed(&"eth"));
+    fn eth_prefix_not_ok() {
+        assert_eq!(false, prefix_ok(&"eth"));
+    }
+
+    #[test]
+    fn long_prefix_not_ok() {
+        assert_eq!(false, prefix_ok(&"neeeeeeeeeeeeeeet"));
     }
 }

@@ -32,8 +32,8 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
-    if ! prefix_allowed(&prefix) {
-        error!("Can't use prefix \"{}\" because it is a well-know prefix used by other tools", prefix);
+    if ! prefix_ok(&prefix) {
+        error!("Invalid prefix, prefix can't be well-known prefix used for NIC naming by other tools and must be shorter than 16 characters");
         exit_maybe_unlock(None, 0);
     }
 
