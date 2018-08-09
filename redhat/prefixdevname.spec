@@ -10,9 +10,7 @@ Source1:        %{name}-%{version}-vendor.tar.xz
 
 ExclusiveArch: %{rust_arches}
 
-# In order to build on CentOS we need to use Software Collection
-# https://www.softwarecollections.org/en/scls/rhscl/rust-toolset-7/
-BuildRequires:  rust-toolset-7
+BuildRequires:  rust-toolset-1.26
 BuildRequires:  git
 BuildRequires:  systemd-devel
 
