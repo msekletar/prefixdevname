@@ -5,8 +5,8 @@ Summary:        Udev helper utility that provides network interface naming using
 
 License:        MIT
 URL:            https://www.github.com/msekletar/prefixdevname
-Source0:        https://www.github.com/msekletar/prefixdevname/archive/%{name}-%{version}.tar.xz
-Source1:        %{name}-%{version}-vendor.tar.xz
+Source0:        https://www.github.com/msekletar/prefixdevname/archive/v%{version}.tar.gz
+Source1:        %{name}-%{version}-vendor.tar.gz
 
 ExclusiveArch: %{rust_arches}
 

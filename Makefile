@@ -35,7 +35,7 @@ uninstall:
 	rm -rf $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname
 
 dist:
-	@git archive HEAD --prefix $(NAME)-$(VERSION)/ | xz > $(ARCHIVE)
+	@git archive HEAD --prefix $(NAME)-$(VERSION)/ | zcat > $(ARCHIVE)
 
 vendor:
 	@rm -rf vendor
