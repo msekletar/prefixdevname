@@ -38,9 +38,8 @@ net_setup_link built-in (e.g. /etc/systemd/network/71-net-ifnames-prefix-net0.li
 %doc README.md
 %{_prefix}/lib/udev/%{name}
 %{_prefix}/lib/udev/rules.d/*.rules
-%dir %{_prefix}/lib/dracut/modules/71%{name}
-%{_prefix}/lib/dracut/modules/71%{name}/*
-
+%dir %{_prefix}/lib/dracut/modules.d/71%{name}
+%{_prefix}/lib/dracut/modules.d/71%{name}/*
 
 %changelog
 * Wed Aug 08 2018 Michal Sekletar <msekleta@redhat.com>
