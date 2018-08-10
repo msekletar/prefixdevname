@@ -4,8 +4,8 @@ MINOR:=1
 PATCH:=0
 
 VERSION:=$(MAJOR).$(MINOR).$(PATCH)
-ARCHIVE:=$(NAME)-$(VERSION).tar.xz
-VENDOR:=$(NAME)-$(VERSION)-vendor.tar.xz
+ARCHIVE:=$(NAME)-$(VERSION).tar.gz
+VENDOR:=$(NAME)-$(VERSION)-vendor.tar.gz
 
 FEDORA_VERSION:=rawhide
 
@@ -35,12 +35,12 @@ uninstall:
 	rm -rf $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname
 
 dist:
-	@git archive HEAD --prefix $(NAME)-$(VERSION)/ | zcat > $(ARCHIVE)
+	@git archive HEAD --prefix $(NAME)-$(VERSION)/ | gzip > $(ARCHIVE)
 
 vendor:
 	@rm -rf vendor
 	@cargo vendor
-	@tar -cJf $(VENDOR) vendor
+	@tar -czf $(VENDOR) vendor
 
 srpm: dist
 	@cp $(ARCHIVE) $(VENDOR) ~/rpmbuild/SOURCES
