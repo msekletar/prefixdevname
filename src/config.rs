@@ -2,7 +2,8 @@
 
 use std::fs;
 use std::error::Error;
-use std::io::{Write};
+use std::io;
+use std::io::Write;
 use std::string::ToString;
 use std::cmp::Ordering;
 use std::path::PathBuf;
@@ -191,6 +192,17 @@ impl NetSetupLinkConfig {
                 continue;
             }
 
+            // XXX: Move this to its own function and add more devtypes
+            match device.devtype() {
+                Some(t) => {
+                    match t.to_str() {
+                        Some("vlan") | Some("bond") | Some("bridge") => continue,
+                        _ => {}
+                    }
+                }
+                None => {}
+            }
+
             let hwaddr = device.attribute_value("address").ok_or("Failed to read value of the 'address' sysfs attribute")?.to_str().ok_or("Failed to convert from ffi::OsStr to &str");
             links.push(PrefixedLink::new_with_hwaddr(&name?, &hwaddr?)?);
         }
@@ -203,8 +215,16 @@ impl NetSetupLinkConfig {
     fn enumerate_links_from_files(&mut self) -> Result<(), Box<Error>> {
         let mut link_files = Vec::new();
 
-        for n in fs::read_dir(NET_SETUP_LINK_CONF_DIR)? {
-            let entry = match n {
+        let files = match fs::read_dir(NET_SETUP_LINK_CONF_DIR) {
+            Ok(d) => d,
+            Err(e) => match e.kind() {
+                io::ErrorKind::NotFound => return Ok(()),
+                _ => return Err(From::from(e))
+            }
+        };
+
+        for f in files {
+            let entry = match f {
                 Ok(e) => e,
                 Err(_) => continue,
             };
