@@ -86,8 +86,10 @@ fn main() {
         exit_maybe_unlock(Some(&mut sema), 1);
     }
 
-    info!("New link file was generated at {}", link_config.link_file_path().into_os_string().into_string().unwrap());
-    info!("Consider rebuilding initrd image, using \"dracut -f\"");
+    debug!("New link file was generated at {}", link_config.link_file_path().into_os_string().into_string().unwrap());
+    debug!("Consider rebuilding initrd image, using \"dracut -f\"");
+
+    println!("{}", next_link_name);
 
     sema.unlock();
 }

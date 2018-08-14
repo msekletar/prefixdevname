@@ -6,6 +6,6 @@ ATTR{type}!="1",  GOTO="net_ifnames_prefix_end"
 
 IMPORT{cmdline}="net.ifnames.prefix"
 ENV{net.ifnames.prefix}!="?*", GOTO="net_ifnames_prefix_end"
-PROGRAM="/usr/lib/udev/prefixdevname"
+PROGRAM="/usr/lib/udev/prefixdevname", RESULT=="?*", NAME="$result"
 
 LABEL="net_ifnames_prefix_end"
