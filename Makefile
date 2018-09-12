@@ -25,9 +25,11 @@ check:
 install:
 	mkdir -p $(DESTDIR)/usr/lib/udev/rules.d
 	mkdir -p $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname
+	mkdir -p $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname-tools
 	install -p -m 0755 target/release/$(NAME) $(DESTDIR)/usr/lib/udev/
 	install -p -m 644 rules/71-prefixdevname.rules $(DESTDIR)/usr/lib/udev/rules.d/
 	install -p -m 0755 dracut/71prefixdevname/module-setup.sh $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname/
+	install -p -m 0755 dracut/71prefixdevname-tools/module-setup.sh $(DESTDIR)/usr/lib/dracut/modules.d/71prefixdevname-tools/
 
 uninstall:
 	rm -f $(DESTDIR)/usr/lib/udev/$(NAME)
