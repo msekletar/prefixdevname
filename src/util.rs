@@ -11,6 +11,14 @@ use regex::Regex;
 
 use sema::*;
 
+pub fn rename_needed(prefix: &str) -> Result<bool, Box<Error>> {
+    // TODO: if INTERFACE is unset we should probably check sysname
+    let ifname = env::var("INTERFACE").unwrap_or("".to_string());
+    let re: Regex = Regex::new(&format!("{}\\d+", prefix)).unwrap();
+
+    Ok(!re.is_match(&ifname))
+}
+
 pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
     use std::num::ParseIntError;
 
@@ -160,5 +168,24 @@ mod tests {
     #[test]
     fn long_prefix_not_ok() {
         assert_eq!(false, prefix_ok(&"neeeeeeeeeeeeeeet"));
+    }
+
+    #[test]
+    fn rename_is_needed() {
+        env::set_var("INTERFACE", "eth0");
+
+        assert_eq!(rename_needed("net").unwrap(), true);
+    }
+
+    #[test]
+    fn rename_not_needed() {
+        env::set_var("INTERFACE", "net0");
+
+        assert_eq!(rename_needed("net").unwrap(), false);
+    }
+
+    #[test]
+    fn rename_needed_interface_unset() {
+        assert_eq!(rename_needed("net").unwrap(), true);
     }
 }

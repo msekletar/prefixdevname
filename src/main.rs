@@ -37,6 +37,11 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
+    if ! rename_needed(&prefix).unwrap() {
+        info!("Interface name already has expected format, not renaming again");
+        exit_maybe_unlock(None, 0);
+    }
+
     let mut sema = match Semaphore::new_with_name("net-prefix-ifnames") {
         Ok(s) => s,
         Err(e) => {
