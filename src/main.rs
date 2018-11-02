@@ -37,8 +37,10 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
-    if ! rename_needed(&prefix).unwrap() {
-        info!("Interface name already has expected format, not renaming again");
+    let ifname = event_device_name();
+
+    if ! rename_needed(&ifname, &prefix).unwrap() {
+        println!("{}", ifname);
         exit_maybe_unlock(None, 0);
     }
 
