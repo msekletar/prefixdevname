@@ -37,6 +37,11 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
+    if event_device_virtual() {
+        debug!("Called for virtual network device, ignoring");
+        exit_maybe_unlock(None, 0);
+    }
+
     let ifname = event_device_name();
 
     if ! rename_needed(&ifname, &prefix).unwrap() {

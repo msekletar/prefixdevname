@@ -23,6 +23,12 @@ pub fn event_device_name() -> String {
     ifname.to_string()
 }
 
+pub fn event_device_virtual() -> bool {
+    let devpath = env::var("DEVPATH").unwrap_or("".to_string());
+
+    devpath.starts_with("/devices/virtual")
+}
+
 pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
     use std::num::ParseIntError;
 
@@ -187,5 +193,19 @@ mod tests {
     #[test]
     fn rename_needed_interface_unset() {
         assert_eq!(rename_needed("", "net").unwrap(), true);
+    }
+
+    #[test]
+    fn event_device_not_virtual() {
+        env::set_var("DEVPATH", "/devices/pci0000:00/0000:00:03.0/virtio0/net/eth0");
+
+        assert_eq!(event_device_virtual(), false);
+    }
+
+    #[test]
+    fn event_device_is_virtual() {
+        env::set_var("DEVPATH", "/devices/virtual/net/bond0");
+
+        assert_eq!(event_device_virtual(), true);
     }
 }
