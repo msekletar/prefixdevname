@@ -98,7 +98,10 @@ pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
 }
 
 pub fn prefix_ok<T: AsRef<str>>(prefix: &T) -> bool {
-    let forbidden = vec!["eth", "eno", "ens", "em"];
+    // List of forbidden prefixes include kernel's default prefix (eth), biosdevname's prefix (em)
+    // and several other prefixes used by udev's net_id built-in
+    // https://github.com/systemd/systemd/blob/master/src/udev/udev-builtin-net_id.c#L20
+    let forbidden = vec!["eth", "eno", "ens", "enb", "enc", "enx", "enP", "enp", "env", "ena", "em"];
 
     forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none() && prefix.as_ref().len() < 16
 }
