@@ -1,17 +1,16 @@
 // SPDX-License-Identifier:  MIT
 
-use libc;
 use std::error::Error;
 use std::ffi::CString;
 
-#[derive(Debug)]
+#[allow(dead_code)]
 pub struct Semaphore {
     raw_sema: *mut libc::sem_t,
     name: CString,
 }
 
 impl Semaphore {
-    pub fn new_with_name(name: &str) -> Result<Semaphore, Box<Error>> {
+    pub fn new_with_name(name: &str) -> Result<Semaphore, Box<dyn Error>> {
         let raw_sema_name = CString::new(name)?;
 
         let s;

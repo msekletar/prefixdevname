@@ -10,13 +10,13 @@ use std::path::PathBuf;
 use std::string::ToString;
 
 use ini::Ini;
-use libudev;
 use regex::Regex;
 
-use util::*;
+use crate::hwaddr_from_event_device;
+use crate::util::*;
 
-static NET_SETUP_LINK_CONF_DIR: &'static str = "/etc/systemd/network/";
-static LINK_FILE_PREFIX: &'static str = "71-net-ifnames-prefix-";
+static NET_SETUP_LINK_CONF_DIR: &str = "/etc/systemd/network/";
+static LINK_FILE_PREFIX: &str = "71-net-ifnames-prefix-";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrefixedLink {
@@ -26,7 +26,7 @@ pub struct PrefixedLink {
 }
 
 impl PrefixedLink {
-    pub fn new<T: ToString>(link_name: &T) -> Result<PrefixedLink, Box<Error>> {
+    pub fn new<T: ToString>(link_name: &T) -> Result<PrefixedLink, Box<dyn Error>> {
         let name = link_name.to_string();
         PrefixedLink::link_name_sane(&name)?;
 
@@ -39,10 +39,10 @@ impl PrefixedLink {
             None => "".to_string(),
         };
 
-        let i = name.trim_left_matches(&prefix).parse::<u64>()?;
+        let i = name.trim_start_matches(&prefix).parse::<u64>()?;
 
         let config = PrefixedLink {
-            name: name,
+            name,
             index: i,
             hwaddr: hwaddr_from_event_device()?,
         };
@@ -53,7 +53,7 @@ impl PrefixedLink {
     pub fn new_with_hwaddr<T: ToString>(
         link_name: &T,
         hwaddr: &T,
-    ) -> Result<PrefixedLink, Box<Error>> {
+    ) -> Result<PrefixedLink, Box<dyn Error>> {
         let addr = hwaddr_normalize(hwaddr)?;
         let name = link_name.to_string();
         PrefixedLink::link_name_sane(link_name)?;
@@ -66,7 +66,7 @@ impl PrefixedLink {
             Some(c) => c[1].to_string(),
             None => "".to_string(),
         };
-        let i = name.trim_left_matches(&prefix).parse::<u64>()?;
+        let i = name.trim_start_matches(&prefix).parse::<u64>()?;
 
         let config = PrefixedLink {
             name: link_name.to_string(),
@@ -77,14 +77,14 @@ impl PrefixedLink {
         Ok(config)
     }
 
-    pub fn link_name_sane<T: ToString>(link_name: &T) -> Result<(), Box<Error>> {
+    pub fn link_name_sane<T: ToString>(link_name: &T) -> Result<(), Box<dyn Error>> {
         let name = link_name.to_string();
 
-        if name.to_string().is_empty() {
+        if name.is_empty() {
             return Err(From::from("Link name can't be empty string"));
         }
 
-        if name.to_string().as_bytes().len() > 16 {
+        if name.as_bytes().len() > 16 {
             return Err(From::from("Link name too long"));
         }
 
@@ -98,7 +98,7 @@ impl PrefixedLink {
         path
     }
 
-    pub fn write_link_file(&self) -> Result<(), Box<Error>> {
+    pub fn write_link_file(&self) -> Result<(), Box<dyn Error>> {
         fs::create_dir_all(NET_SETUP_LINK_CONF_DIR)?;
 
         let path = self.link_file_path();
@@ -116,12 +116,7 @@ impl PrefixedLink {
 
 impl Ord for PrefixedLink {
     fn cmp(&self, other: &PrefixedLink) -> Ordering {
-        if self.index < other.index {
-            return Ordering::Less;
-        } else if self.index > other.index {
-            return Ordering::Greater;
-        }
-        Ordering::Equal
+        self.index.cmp(&other.index)
     }
 }
 
@@ -146,7 +141,7 @@ impl NetSetupLinkConfig {
         }
     }
 
-    pub fn load(&mut self) -> Result<(), Box<Error>> {
+    pub fn load(&mut self) -> Result<(), Box<dyn Error>> {
         self.enumerate_links_from_udev()?;
         self.enumerate_links_from_files()?;
 
@@ -167,7 +162,7 @@ impl NetSetupLinkConfig {
         None
     }
 
-    pub fn next_link_name(&self) -> Result<String, Box<Error>> {
+    pub fn next_link_name(&self) -> Result<String, Box<dyn Error>> {
         if self.links.is_empty() {
             return Ok(format!("{}{}", self.ifname_prefix, "0"));
         }
@@ -178,7 +173,7 @@ impl NetSetupLinkConfig {
             .ok_or("Failed to obtain last vector element")?;
         let last_index = last
             .name
-            .trim_left_matches(&self.ifname_prefix)
+            .trim_start_matches(&self.ifname_prefix)
             .parse::<u64>()?;
 
         Ok(format!(
@@ -188,14 +183,16 @@ impl NetSetupLinkConfig {
         ))
     }
 
-    fn match_ethernet_links(udev_enumerate: &mut libudev::Enumerator) -> Result<(), Box<Error>> {
+    fn match_ethernet_links(
+        udev_enumerate: &mut libudev::Enumerator,
+    ) -> Result<(), Box<dyn Error>> {
         udev_enumerate.match_subsystem("net")?;
         udev_enumerate.match_attribute("type", "1")?;
 
         Ok(())
     }
 
-    fn enumerate_links_from_udev(&mut self) -> Result<(), Box<Error>> {
+    fn enumerate_links_from_udev(&mut self) -> Result<(), Box<dyn Error>> {
         let udev = libudev::Context::new()?;
         let mut enumerate = libudev::Enumerator::new(&udev)?;
         let mut links = Vec::new();
@@ -235,7 +232,7 @@ impl NetSetupLinkConfig {
         Ok(())
     }
 
-    fn enumerate_links_from_files(&mut self) -> Result<(), Box<Error>> {
+    fn enumerate_links_from_files(&mut self) -> Result<(), Box<dyn Error>> {
         let mut link_files = Vec::new();
 
         let files = match fs::read_dir(NET_SETUP_LINK_CONF_DIR) {
@@ -361,7 +358,7 @@ mod tests {
         assert!(config.is_ok());
     }
 
-    fn mock_sysfs() -> Result<(), Box<Error>> {
+    fn mock_sysfs() -> Result<(), Box<dyn Error>> {
         use std::io::prelude::*;
         use std::ptr;
         let mut err: *mut u8 = ptr::null_mut();

@@ -4,3 +4,4 @@
 Vagrantfile
 *.tar.xz
 vendor
+.vscode/**

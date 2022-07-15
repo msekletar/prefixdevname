@@ -1,7 +1,6 @@
 // SPDX-License-Identifier:  MIT
 
 use regex::Regex;
-use std;
 use std::env;
 use std::error::Error;
 use std::fs::File;
@@ -13,20 +12,18 @@ use libudev::Device;
 
 use sema::*;
 
-pub fn rename_needed(ifname: &str, prefix: &str) -> Result<bool, Box<Error>> {
+pub fn rename_needed(ifname: &str, prefix: &str) -> Result<bool, Box<dyn Error>> {
     let re: Regex = Regex::new(&format!("{}\\d+", prefix)).unwrap();
 
-    Ok(!re.is_match(&ifname))
+    Ok(!re.is_match(ifname))
 }
 
 pub fn event_device_name() -> String {
-    let ifname = env::var("INTERFACE").unwrap_or("".to_string());
-
-    ifname.to_string()
+    env::var("INTERFACE").unwrap_or_else(|_| "".to_string())
 }
 
 pub fn event_device_virtual() -> bool {
-    let devpath = env::var("DEVPATH").unwrap_or("".to_string());
+    let devpath = env::var("DEVPATH").unwrap_or_else(|_| "".to_string());
 
     devpath.starts_with("/devices/virtual")
 }
@@ -56,25 +53,25 @@ pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
         }
     }
 
-    return true;
+    true
 }
 
-pub fn hwaddr_normalize<T: ToString>(hwaddr: &T) -> Result<String, Box<Error>> {
+pub fn hwaddr_normalize<T: ToString>(hwaddr: &T) -> Result<String, Box<dyn Error>> {
     let mut addr = hwaddr.to_string();
 
     if !hwaddr_valid(&addr) {
         return Err(From::from("Failed to parse MAC address"));
     }
 
-    if addr.find("-").is_some() {
-        addr = addr.replace("-", ":")
+    if addr.find('-').is_some() {
+        addr = addr.replace('-', ":")
     }
 
     addr.make_ascii_uppercase();
     Ok(addr)
 }
 
-pub fn hwaddr_from_event_device() -> Result<String, Box<Error>> {
+pub fn hwaddr_from_event_device() -> Result<String, Box<dyn Error>> {
     let udev = libudev::Context::new()?;
     let devpath = env::var("DEVPATH")?;
     let mut syspath = "/sys".to_string();
@@ -95,7 +92,7 @@ pub fn hwaddr_from_event_device() -> Result<String, Box<Error>> {
     Ok(addr)
 }
 
-pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
+pub fn get_prefix_from_file(path: &str) -> Result<String, Box<dyn Error>> {
     let mut f = File::open(path)?;
     let mut content = String::new();
 
@@ -118,7 +115,7 @@ pub fn prefix_ok<T: AsRef<str>>(prefix: &T) -> bool {
         "eth", "eno", "ens", "enb", "enc", "enx", "enP", "enp", "env", "ena", "em",
     ];
 
-    forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none() && prefix.as_ref().len() < 16
+    !forbidden.iter().any(|&p| p == prefix.as_ref()) && prefix.as_ref().len() < 16
 }
 
 pub fn exit_maybe_unlock(sema: Option<&mut Semaphore>, exit_code: i32) -> ! {
