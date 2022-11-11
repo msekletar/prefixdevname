@@ -392,6 +392,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Test requires special environment - use make check"]
     fn prefixed_link_name() {
         mock_sysfs().unwrap();
 
@@ -400,6 +401,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Test requires special environment - use make check"]
     fn prefixed_link_hwaddr() {
         mock_sysfs().unwrap();
 
@@ -408,6 +410,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Test requires special environment - use make check"]
     fn prefixed_link_link_file_path() {
         mock_sysfs().unwrap();
 
@@ -419,6 +422,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Test requires special environment - use make check"]
     fn net_setup_link_config_sysfs_only() {
         mock_sysfs().unwrap();
 
@@ -429,6 +433,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Test requires special environment - use make check"]
     fn xx_net_setup_link_config_mix() {
         mock_sysfs().unwrap();
 
