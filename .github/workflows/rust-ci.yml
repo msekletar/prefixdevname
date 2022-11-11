@@ -3,7 +3,7 @@
 name: Rust CI
 on:
   pull_request:
-  push: 
+  push:
     branches: [ main ]
 
 permissions:
@@ -23,6 +23,9 @@ jobs:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
+
+      - name: Install libudev devel package
+        run: sudo apt-get install -y libudev-dev
 
       # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
