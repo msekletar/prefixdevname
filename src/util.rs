@@ -1,32 +1,29 @@
 // SPDX-License-Identifier:  MIT
 
-use std;
+use regex::Regex;
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
-use std::env;
 use std::path::PathBuf;
-use regex::Regex;
 
 extern crate libudev;
 use libudev::Device;
 
 use sema::*;
 
-pub fn rename_needed(ifname: &str, prefix: &str) -> Result<bool, Box<Error>> {
+pub fn rename_needed(ifname: &str, prefix: &str) -> Result<bool, Box<dyn Error>> {
     let re: Regex = Regex::new(&format!("{}\\d+", prefix)).unwrap();
 
-    Ok(!re.is_match(&ifname))
+    Ok(!re.is_match(ifname))
 }
 
 pub fn event_device_name() -> String {
-    let ifname = env::var("INTERFACE").unwrap_or("".to_string());
-
-    ifname.to_string()
+    env::var("INTERFACE").unwrap_or_else(|_| "".to_string())
 }
 
 pub fn event_device_virtual() -> bool {
-    let devpath = env::var("DEVPATH").unwrap_or("".to_string());
+    let devpath = env::var("DEVPATH").unwrap_or_else(|_| "".to_string());
 
     devpath.starts_with("/devices/virtual")
 }
@@ -37,7 +34,7 @@ pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
     let hwaddr_length_as_str = 17;
     let addr = hwaddr.to_string();
 
-    if ! addr.is_ascii() {
+    if !addr.is_ascii() {
         return false;
     }
 
@@ -45,7 +42,10 @@ pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
         return false;
     }
 
-    let bytes: Vec<Result<u8, ParseIntError>> = addr.split(|c| c == ':' || c == '-').map(|s| u8::from_str_radix(s, 16)).collect();
+    let bytes: Vec<Result<u8, ParseIntError>> = addr
+        .split(|c| c == ':' || c == '-')
+        .map(|s| u8::from_str_radix(s, 16))
+        .collect();
 
     for b in bytes {
         if b.is_err() {
@@ -53,38 +53,46 @@ pub fn hwaddr_valid<T: ToString>(hwaddr: &T) -> bool {
         }
     }
 
-    return true;
+    true
 }
 
-pub fn hwaddr_normalize<T: ToString>(hwaddr: &T) -> Result<String, Box<Error>> {
+pub fn hwaddr_normalize<T: ToString>(hwaddr: &T) -> Result<String, Box<dyn Error>> {
     let mut addr = hwaddr.to_string();
 
-    if ! hwaddr_valid(&addr) {
+    if !hwaddr_valid(&addr) {
         return Err(From::from("Failed to parse MAC address"));
     }
 
-    if addr.find("-").is_some() {
-        addr = addr.replace("-", ":")
+    if addr.find('-').is_some() {
+        addr = addr.replace('-', ":")
     }
 
     addr.make_ascii_uppercase();
     Ok(addr)
 }
 
-pub fn hwaddr_from_event_device() -> Result<String, Box<Error>> {
+pub fn hwaddr_from_event_device() -> Result<String, Box<dyn Error>> {
     let udev = libudev::Context::new()?;
     let devpath = env::var("DEVPATH")?;
     let mut syspath = "/sys".to_string();
 
     syspath.push_str(&devpath);
 
-    let attr = Device::from_syspath(&udev, &PathBuf::from(syspath))?.attribute_value("address").ok_or("Failed to get MAC Address")?.to_owned();
-    let addr = hwaddr_normalize(&attr.to_str().ok_or("Failed to convert OsStr to String")?.to_string())?;
+    let attr = Device::from_syspath(&udev, &PathBuf::from(syspath))?
+        .attribute_value("address")
+        .ok_or("Failed to get MAC Address")?
+        .to_owned();
+    let addr = hwaddr_normalize(
+        &attr
+            .to_str()
+            .ok_or("Failed to convert OsStr to String")?
+            .to_string(),
+    )?;
 
     Ok(addr)
 }
 
-pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
+pub fn get_prefix_from_file(path: &str) -> Result<String, Box<dyn Error>> {
     let mut f = File::open(path)?;
     let mut content = String::new();
 
@@ -93,7 +101,7 @@ pub fn get_prefix_from_file(path: &str) -> Result<String, Box<Error>> {
     let re = Regex::new(r"net.ifnames.prefix=([[:alpha:]]+)")?;
     let prefix = match re.captures(&content) {
         Some(c) => c[1].to_string(),
-        None => "".to_string()
+        None => "".to_string(),
     };
 
     Ok(prefix)
@@ -103,9 +111,11 @@ pub fn prefix_ok<T: AsRef<str>>(prefix: &T) -> bool {
     // List of forbidden prefixes include kernel's default prefix (eth), biosdevname's prefix (em)
     // and several other prefixes used by udev's net_id built-in
     // https://github.com/systemd/systemd/blob/master/src/udev/udev-builtin-net_id.c#L20
-    let forbidden = vec!["eth", "eno", "ens", "enb", "enc", "enx", "enP", "enp", "env", "ena", "em"];
+    let forbidden = vec![
+        "eth", "eno", "ens", "enb", "enc", "enx", "enP", "enp", "env", "ena", "em",
+    ];
 
-    forbidden.iter().find(|&&p| p == prefix.as_ref()).is_none() && prefix.as_ref().len() < 16
+    !forbidden.iter().any(|&p| p == prefix.as_ref()) && prefix.as_ref().len() < 16
 }
 
 pub fn exit_maybe_unlock(sema: Option<&mut Semaphore>, exit_code: i32) -> ! {
@@ -156,18 +166,27 @@ mod tests {
 
     #[test]
     fn hwaddr_normalize_ok() {
-        assert_eq!(hwaddr_normalize(&"52:54:00:52:1f:93").unwrap(), "52:54:00:52:1F:93");
+        assert_eq!(
+            hwaddr_normalize(&"52:54:00:52:1f:93").unwrap(),
+            "52:54:00:52:1F:93"
+        );
     }
 
     #[test]
     fn hwaddr_normalize_ok_dashed() {
-        assert_eq!(hwaddr_normalize(&"52-54-00-52-1f-93").unwrap(), "52:54:00:52:1F:93");
+        assert_eq!(
+            hwaddr_normalize(&"52-54-00-52-1f-93").unwrap(),
+            "52:54:00:52:1F:93"
+        );
     }
 
     #[test]
     #[should_panic]
     fn hwaddr_normalize_invalid() {
-        assert_eq!(hwaddr_normalize(&"xx:54:00:52:1f:93").unwrap(), "52:54:00:52:1F:93");
+        assert_eq!(
+            hwaddr_normalize(&"xx:54:00:52:1f:93").unwrap(),
+            "52:54:00:52:1F:93"
+        );
     }
 
     #[test]
@@ -202,7 +221,10 @@ mod tests {
 
     #[test]
     fn event_device_not_virtual() {
-        env::set_var("DEVPATH", "/devices/pci0000:00/0000:00:03.0/virtio0/net/eth0");
+        env::set_var(
+            "DEVPATH",
+            "/devices/pci0000:00/0000:00:03.0/virtio0/net/eth0",
+        );
 
         assert_eq!(event_device_virtual(), false);
     }

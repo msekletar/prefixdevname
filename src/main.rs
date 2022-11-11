@@ -1,19 +1,22 @@
 // SPDX-License-Identifier:  MIT
 
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate env_logger;
-extern crate libudev;
 extern crate ini;
-#[macro_use] extern crate lazy_static;
-extern crate regex;
+extern crate libudev;
+
+#[macro_use]
+extern crate lazy_static;
 extern crate libc;
+extern crate regex;
 
 mod config;
 mod sema;
 mod util;
 
-use sema::*;
 use config::*;
+use sema::*;
 use util::*;
 
 fn main() {
@@ -32,7 +35,7 @@ fn main() {
         exit_maybe_unlock(None, 0);
     }
 
-    if ! prefix_ok(&prefix) {
+    if !prefix_ok(&prefix) {
         error!("Invalid prefix, prefix can't be well-known prefix used for NIC naming by other tools and must be shorter than 16 characters");
         exit_maybe_unlock(None, 0);
     }
@@ -44,7 +47,7 @@ fn main() {
 
     let ifname = event_device_name();
 
-    if ! rename_needed(&ifname, &prefix).unwrap() {
+    if !rename_needed(&ifname, &prefix).unwrap() {
         println!("{}", ifname);
         exit_maybe_unlock(None, 0);
     }
@@ -68,7 +71,10 @@ fn main() {
     let event_device_hwaddr = match hwaddr_from_event_device() {
         Ok(d) => d,
         Err(e) => {
-            error!("Failed to determine MAC address for the event device: {}", e);
+            error!(
+                "Failed to determine MAC address for the event device: {}",
+                e
+            );
             exit_maybe_unlock(Some(&mut sema), 1)
         }
     };
@@ -98,7 +104,14 @@ fn main() {
         exit_maybe_unlock(Some(&mut sema), 1);
     }
 
-    debug!("New link file was generated at {}", link_config.link_file_path().into_os_string().into_string().unwrap());
+    debug!(
+        "New link file was generated at {}",
+        link_config
+            .link_file_path()
+            .into_os_string()
+            .into_string()
+            .unwrap()
+    );
     debug!("Consider rebuilding initrd image, using \"dracut -f\"");
 
     println!("{}", next_link_name);
