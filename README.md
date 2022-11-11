@@ -2,9 +2,6 @@
 
 Simple udev helper that let's you define your own prefix used for NIC naming.
 
-## Code status
-[![Build Status](https://travis-ci.org/msekletar/prefixdevname.svg?branch=master)](https://travis-ci.org/msekletar/prefixdevname)
-
 ## License
 
 MIT
