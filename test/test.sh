@@ -7,7 +7,7 @@ tmpdir=$(mktemp -d)
 mount --bind "$tmpdir" /etc/systemd/network
 
 # run the actual test suite
-umockdev-wrapper cargo test -- --test-threads=1
+umockdev-wrapper cargo test -- --include-ignored --test-threads=1
 
 # cleanup
 umount /etc/systemd/network
