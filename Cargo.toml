@@ -5,7 +5,7 @@ version = "0.1.0"
 [dependencies]
 env_logger = "0.9.3"
 lazy_static = "*"
-libc = "0.2.40"
+libc = "0.2.137"
 libudev = "0.3"
 log = "0.4.17"
 regex = "1.7.0"
