@@ -186,7 +186,7 @@ impl NetSetupLinkConfig {
         NetSetupLinkConfig::match_ethernet_links(&mut enumerate)?;
 
         for device in enumerate.scan_devices()? {
-            let name = device.sysname().to_str().ok_or("Failed to convert from ffi::OsStr to &str");
+            let name = device.sysname().unwrap().to_str().ok_or("Failed to convert from ffi::OsStr to &str");
 
             if ! name?.to_string().starts_with(&self.ifname_prefix) {
                 continue;
@@ -256,8 +256,8 @@ impl NetSetupLinkConfig {
 
             let hwaddr = mac;
 
-            self.config.insert(hwaddr.to_string(), PrefixedLink::new(name)?);
-            self.links.push(PrefixedLink::new_with_hwaddr(name, hwaddr)?);
+            self.config.insert(hwaddr.to_string(), PrefixedLink::new(&name)?);
+            self.links.push(PrefixedLink::new_with_hwaddr(&name, &hwaddr)?);
         }
         Ok(())
     }

@@ -6,8 +6,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::env;
 use std::path::PathBuf;
-use libudev;
 use regex::Regex;
+
+extern crate libudev;
+use libudev::Device;
 
 use sema::*;
 
@@ -76,7 +78,7 @@ pub fn hwaddr_from_event_device() -> Result<String, Box<Error>> {
 
     syspath.push_str(&devpath);
 
-    let attr = udev.device_from_syspath(&PathBuf::from(syspath))?.attribute_value("address").ok_or("Failed to get MAC Address")?.to_owned();
+    let attr = Device::from_syspath(&udev, &PathBuf::from(syspath))?.attribute_value("address").ok_or("Failed to get MAC Address")?.to_owned();
     let addr = hwaddr_normalize(&attr.to_str().ok_or("Failed to convert OsStr to String")?.to_string())?;
 
     Ok(addr)
