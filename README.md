@@ -1,4 +1,4 @@
-# prefixdevname | [![Rust CI](https://github.com/msekletar/prefixdevname/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/msekletar/prefixdevname/actions/workflows/rust-ci.yml) [![codecov](https://codecov.io/gh/msekleta/prefixdevname/branch/main/graph/badge.svg)](https://codecov.io/gh/msekleta/prefixdevname)
+# prefixdevname | [![Rust CI](https://github.com/msekletar/prefixdevname/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/msekletar/prefixdevname/actions/workflows/rust-ci.yml) [![codecov](https://codecov.io/gh/msekletar/prefixdevname/branch/main/graph/badge.svg?token=XFZXPIS5I9)](https://codecov.io/gh/msekletar/prefixdevname)
 
 Simple udev helper that let's you define your own prefix used for NIC naming.
 
