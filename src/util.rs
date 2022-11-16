@@ -10,7 +10,7 @@ use std::path::PathBuf;
 extern crate libudev;
 use libudev::Device;
 
-use sema::*;
+use crate::sema::Semaphore;
 
 pub fn rename_needed(ifname: &str, prefix: &str) -> Result<bool, Box<dyn Error>> {
     let re: Regex = Regex::new(&format!("{}\\d+", prefix)).unwrap();
