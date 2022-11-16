@@ -1,7 +1,18 @@
 [package]
-authors = ["Michal Sekletar <msekleta@redhat.com>"]
 name = "prefixdevname"
+
 version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Michal Sekletar <msekleta@redhat.com>"]
+repository = "https://github.com/msekletar/prefixdevname"
+exclude = ["/target/*", "/.github/*"]
+
+keywords = []
+categories = []
+description = "Udev helper utility that provides network interface naming using user defined prefix"
+readme = "README.md"
+
 [dependencies]
 env_logger = "0.9.3"
 lazy_static = "*"
