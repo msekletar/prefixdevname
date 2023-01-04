@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Include the prefixdevname tools only if this was explicitely requested
+# Include the prefixdevname tools only if this was explicitly requested
 check() {
     return 255
 }
