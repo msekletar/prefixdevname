@@ -2,6 +2,7 @@
 
 name: Shell CI
 on:
+  push:
   pull_request:
     branches: [ main ]
 
@@ -13,15 +14,26 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
 
+    permissions:
+      security-events: write
+
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Differential ShellCheck
+      - id: ShellCheck
+        name: Differential ShellCheck
         uses: redhat-plumbers-in-action/differential-shellcheck@v4
         with:
           severity: warning
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ always() }}
+        name: Upload artifact with ShellCheck defects in SARIF format
+        uses: actions/upload-artifact@v3
+        with:
+          name: Differential ShellCheck SARIF
+          path: ${{ steps.ShellCheck.outputs.sarif }}
 
 ...
