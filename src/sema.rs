@@ -16,7 +16,7 @@ impl Semaphore {
         let s;
         unsafe {
             s = libc::sem_open(
-                raw_sema_name.as_ptr() as *const i8,
+                raw_sema_name.as_ptr(),
                 libc::O_CREAT,
                 libc::S_IRUSR | libc::S_IWUSR,
                 1,
