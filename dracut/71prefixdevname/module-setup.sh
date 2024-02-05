@@ -5,13 +5,15 @@ check() {
     return 0
 }
 
+depends() {
+  echo systemd
+}
+
 install() {
     orig_shopt="$(shopt -p nullglob)"
     shopt -q -u nullglob
 
-    if dracut_module_included "systemd"; then
-        inst_multiple -H -o /etc/systemd/network/71-net-ifnames-prefix-*.link
-    fi
+    inst_multiple -H -o /etc/systemd/network/71-net-ifnames-prefix-*.link
 
     eval "$orig_shopt"
 }
