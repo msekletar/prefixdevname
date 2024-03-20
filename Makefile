@@ -42,6 +42,7 @@ dist:
 vendor:
 	@rm -rf vendor
 	@cargo vendor
+	@rm -f vendor/winapi*/lib/*
 	@tar -czf $(VENDOR) vendor
 
 srpm: dist
