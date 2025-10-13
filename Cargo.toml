@@ -16,7 +16,7 @@ readme = "README.md"
 [dependencies]
 env_logger = "0.11.8"
 lazy_static = "1.4.0"
-libc = "0.2.174"
+libc = "0.2.177"
 libudev = "0.3"
 log = "0.4.27"
 regex = "1.11.1"
